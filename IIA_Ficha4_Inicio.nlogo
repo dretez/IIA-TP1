@@ -1,6 +1,6 @@
 globals [veneno]
 
-turtles-own [energia preferida rand]
+turtles-own [energia capacidade recolhido counter rand]
 
 to setup
   clear-all
@@ -20,8 +20,10 @@ to setup
     setxy random-xcor random-ycor
     set color red
     set heading 0
-    set energia 100
-    set preferida one-of ["A" "B"]
+    set energia energia_inicial
+    set capacidade capacidade_maxima
+    set recolhido 0
+    set counter 0
   ]
   set veneno one-of ["A" "B"]
 end
@@ -35,7 +37,7 @@ to go
   [
     move
     set energia energia - 1
-    comer
+    recolher
     morrer
   ]
   mais-comida
@@ -50,42 +52,54 @@ to turnRand
 end
 
 to move
-  ifelse [ plabel ] of patch-ahead 1 = preferida
-  [ fd 1 ]
+  if counter > 0
   [
+    set counter counter - 1
+    stop
+  ]
+  move_limpar
+  move_despejar
+  set energia energia - 1
+end
 
-    ifelse [ pcolor ] of patch-ahead 1 = yellow
-    [turnRand]
+to move_limpar
+  set rand random 100
+  ifelse rand < 90
+  [ forward 1 ]
+  [ ifelse rand < 95 [ right 90 ] [ left 90 ] ]
+end
+
+to move_despejar
+  if pcolor = green and recolhido = capacidade
+  [
+    set recolhido 0
+    set counter 5
+    ; incrementar lixo no depósito
+  ]
+end
+
+to move_carregar
+end
+
+to recolher
+  if pcolor = red and recolhido < capacidade
+  [
+    set recolhido recolhido + 1
+    ask one-of (patch-set patch-here neighbors with [pcolor = red])
     [
-      set rand random 100
-      ifelse rand < 90
-      [ forward 1 ]
-      [ ifelse rand < 95 [ right 90 ] [ left 90 ] ]
-      set energia energia - 1
+      set pcolor black
     ]
   ]
 end
 
-to comer
-  ifelse plabel = veneno
-  [
-   set pcolor black
-   set plabel ""
-   die
-  ]
-  [
-   if plabel != ""
-   [
-     set pcolor black
-     set plabel ""
-     set energia energia + 50
-   ]
-  ]
+to comunicar
+  ; quando dois agentes encontram-se, trocam a informação que têm sobre a posição do carregador
 end
 
 to morrer
   if energia < 0
   [
+    set pcolor white
     die
   ]
 end
@@ -111,8 +125,8 @@ end
 GRAPHICS-WINDOW
 328
 17
-739
-429
+1105
+795
 -1
 -1
 24.81
@@ -153,9 +167,9 @@ NIL
 1
 
 SLIDER
-19
+20
 96
-138
+152
 129
 n_agentes
 n_agentes
@@ -185,10 +199,10 @@ NIL
 1
 
 MONITOR
-29
-165
-85
-210
+27
+468
+83
+513
 A
 count patches with [plabel = \"A\"]
 17
@@ -196,10 +210,10 @@ count patches with [plabel = \"A\"]
 11
 
 SLIDER
-149
-97
-278
-130
+166
+98
+295
+131
 perc_comida
 perc_comida
 5
@@ -211,10 +225,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-183
-165
-241
-210
+181
+468
+239
+513
 NIL
 veneno
 17
@@ -222,10 +236,10 @@ veneno
 11
 
 MONITOR
-104
-165
-161
-210
+102
+468
+159
+513
 B
 count patches with [plabel = \"B\"]
 17
@@ -233,10 +247,10 @@ count patches with [plabel = \"B\"]
 11
 
 PLOT
-27
-269
-227
-419
+24
+551
+224
+701
 plot 1
 NIL
 NIL
@@ -259,6 +273,51 @@ taxa_alteracao
 taxa_alteracao
 0 0.001 0.005 0.01 0.05 0.1
 0
+
+SLIDER
+20
+136
+151
+169
+energia_inicial
+energia_inicial
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+20
+176
+151
+209
+capacidade_maxima
+capacidade_maxima
+0
+20
+5.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+20
+219
+193
+252
+tempo_deposito
+tempo_deposito
+0
+200
+20.0
+1
+1
+ticks
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
