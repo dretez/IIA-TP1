@@ -69,7 +69,18 @@ to move
 end
 
 to move_limpar
-  move_random
+  ifelse any? ( neighbors4 with [ pcolor = red ] )
+  [
+    ask one-of ( neighbors4 with [ pcolor = red ] )
+    [
+      set msgx pxcor
+      set msgy pycor
+    ]
+    set xcor msgx
+    set ycor msgy
+    set energia energia - 1
+  ]
+  [ move_random ]
   recolher
 end
 
@@ -142,7 +153,6 @@ end
 
 to move_fd
   ; check for patch coordinates to store
-
   set msgx 1000
   set msgy 1000
   if any? ( neighbors4 with [ pcolor = green ] )
@@ -199,6 +209,7 @@ to recolher
     ]
     set recolhido recolhido + 1
   ]
+  if recolhido = cap [ set objetivo "despejar" ]
 end
 
 to comunicar
@@ -321,9 +332,9 @@ NIL
 
 MONITOR
 27
-468
+367
 83
-513
+412
 A
 count patches with [plabel = \"A\"]
 17
@@ -347,9 +358,9 @@ HORIZONTAL
 
 MONITOR
 181
-468
+367
 239
-513
+412
 NIL
 veneno
 17
@@ -358,9 +369,9 @@ veneno
 
 MONITOR
 102
-468
+367
 159
-513
+412
 B
 count patches with [plabel = \"B\"]
 17
@@ -369,9 +380,9 @@ count patches with [plabel = \"B\"]
 
 PLOT
 24
-551
+450
 224
-701
+600
 plot 1
 NIL
 NIL
@@ -463,7 +474,7 @@ SLIDER
 energiaMin
 energiaMin
 0
-energia_inicial
+energiaMax
 15.0
 1
 1
