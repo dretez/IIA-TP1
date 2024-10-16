@@ -1,6 +1,6 @@
-globals [veneno msgx msgy]
+globals [veneno msgx msgy nDeposito]
 
-turtles-own [energia capacidade recolhido objetivo counter chargex chargey depx depy rand]
+turtles-own [energia cap recolhido objetivo counter chargex chargey depx depy targetx targety rand]
 
 to setup
   clear-all
@@ -17,19 +17,22 @@ to setup
   create-turtles n_agentes
   [
     set shape "face happy"
-    setxy random-xcor random-ycor
+    setxy random-pxcor random-pycor
     set color red
     set heading 0
     set energia energia_inicial
-    set capacidade capacidade_maxima
-    set objetivo "limpa"
+    set cap capMax
+    set objetivo "limpar"
     set recolhido 0
     set counter 0
     set chargex 1000
     set chargey 1000
     set depx 1000
     set depy 1000
+    set targetx 0
+    set targety 0
   ]
+  set nDeposito 0
   set veneno one-of ["A" "B"]
 end
 
@@ -41,7 +44,6 @@ to go
   ask turtles
   [
     move
-    set energia energia - 1
     recolher
     morrer
   ]
@@ -50,8 +52,7 @@ to go
 end
 
 to turnRand
-  set rand random 1
-  ifelse rand = 1
+  ifelse random 1 = 1
   [left 90]
   [right 90]
 end
@@ -62,38 +63,98 @@ to move
     set counter counter - 1
     stop
   ]
-  move_limpar
-  move_despejar
   set energia energia - 1
+  if objetivo = "limpar" [ move_limpar stop ]
+  if objetivo = "despejar" [ move_despejar stop ]
+  if objetivo = "carregar" [ move_carregar stop ]
 end
 
 to move_limpar
-  set rand random 100
-  ifelse rand < 90
-  [ forward 1 ]
-  [ ifelse rand < 95 [ right 90 ] [ left 90 ] ]
+  move_random
+  recolher
 end
 
 to move_despejar
-  if pcolor = green and recolhido = capacidade
+  ifelse depx = 1000 and depy = 1000
+  [ move_random ]
   [
+    set targetx depx
+    set targety depy
+    move_to_target
+  ]
+  if pcolor = green
+  [
+    set nDeposito nDeposito + recolhido
     set recolhido 0
-    set counter 5
-    ; incrementar lixo no depósito
+    set objetivo "limpar"
+    set counter tempo_deposito
   ]
 end
 
 to move_carregar
+  ifelse chargex = 1000 and chargey = 1000
+  [ move_random ]
+  [
+    set targetx chargex
+    set targety chargey
+    move_to_target
+  ]
+  if pcolor = blue
+  [
+    set energia energia_inicial
+    set objetivo "limpar"
+    set counter tempo_carregar
+  ]
+end
+
+to move_random
+  ifelse random 100 < 10
+  [ turnRand ]
+  [ move_fd ]
+end
+
+to move_to_target
+  if heading = 0 [
+    if ycor < targety [ move_fd ]
+    if ycor > targety [ rt 180 stop ]
+    if xcor < targetx [ rt 90 stop ]
+    if xcor > targetx [ lt 90 stop ]
+  ]
+  if heading = 90 [
+    if xcor < targetx [ move_fd ]
+    if xcor > targetx [ rt 180 stop ]
+    if ycor > targety [ rt 90 stop ]
+    if ycor < targety [ lt 90 stop ]
+  ]
+  if heading = 180 [
+    if ycor > targety [ move_fd ]
+    if ycor < targety [ rt 180 stop ]
+    if xcor > targetx [ rt 90 stop ]
+    if xcor < targetx [ lt 90 stop ]
+  ]
+  if heading = 270 [
+    if xcor > targetx [ move_fd ]
+    if xcor < targetx [ rt 180 stop ]
+    if ycor < targety [ rt 90 stop ]
+    if ycor > targety [ lt 90 stop ]
+  ]
+end
+
+to move_fd
+  ; stop robots from crossing obstacles
+  ifelse [pcolor] of patch-ahead 1 = white
+  [turnRand]
+  [fd 1]
 end
 
 to recolher
-  if pcolor = red and recolhido < capacidade
+  if pcolor = red and recolhido < cap
   [
-    set recolhido recolhido + 1
     ask one-of (patch-set patch-here neighbors4 with [pcolor = red])
     [
       set pcolor black
     ]
+    set recolhido recolhido + 1
   ]
 end
 
@@ -101,9 +162,9 @@ to comunicar
   ask turtles
   [
     if chargex != 1000 and chargey != 1000
-    set msgx chargex
-    set msgy chargey
     [
+      set msgx chargex
+      set msgy chargey
       ask turtles-on neighbors4
       [
         set chargex msgx
@@ -311,8 +372,8 @@ SLIDER
 176
 151
 209
-capacidade_maxima
-capacidade_maxima
+capMax
+capMax
 0
 20
 5.0
@@ -328,6 +389,21 @@ SLIDER
 252
 tempo_deposito
 tempo_deposito
+0
+200
+20.0
+1
+1
+ticks
+HORIZONTAL
+
+SLIDER
+21
+262
+193
+295
+tempo_carregar
+tempo_carregar
 0
 200
 20.0
