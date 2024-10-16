@@ -1,6 +1,6 @@
-globals [veneno]
+globals [veneno msgx msgy]
 
-turtles-own [energia capacidade recolhido counter rand]
+turtles-own [energia capacidade recolhido objetivo counter chargex chargey depx depy rand]
 
 to setup
   clear-all
@@ -22,8 +22,13 @@ to setup
     set heading 0
     set energia energia_inicial
     set capacidade capacidade_maxima
+    set objetivo "limpa"
     set recolhido 0
     set counter 0
+    set chargex 1000
+    set chargey 1000
+    set depx 1000
+    set depy 1000
   ]
   set veneno one-of ["A" "B"]
 end
@@ -85,7 +90,7 @@ to recolher
   if pcolor = red and recolhido < capacidade
   [
     set recolhido recolhido + 1
-    ask one-of (patch-set patch-here neighbors with [pcolor = red])
+    ask one-of (patch-set patch-here neighbors4 with [pcolor = red])
     [
       set pcolor black
     ]
@@ -93,7 +98,19 @@ to recolher
 end
 
 to comunicar
-  ; quando dois agentes encontram-se, trocam a informação que têm sobre a posição do carregador
+  ask turtles
+  [
+    if chargex != 1000 and chargey != 1000
+    set msgx chargex
+    set msgy chargey
+    [
+      ask turtles-on neighbors4
+      [
+        set chargex msgx
+        set chargey msgy
+      ]
+    ]
+  ]
 end
 
 to morrer
