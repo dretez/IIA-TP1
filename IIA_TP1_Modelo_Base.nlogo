@@ -63,7 +63,6 @@ to move
     set counter counter - 1
     stop
   ]
-  set energia energia - 1
   if objetivo = "limpar" [ move_limpar stop ]
   if objetivo = "despejar" [ move_despejar stop ]
   if objetivo = "carregar" [ move_carregar stop ]
@@ -115,25 +114,25 @@ end
 
 to move_to_target
   if heading = 0 [
-    if ycor < targety [ move_fd ]
+    if ycor < targety [ move_fd stop ]
     if ycor > targety [ rt 180 stop ]
     if xcor < targetx [ rt 90 stop ]
     if xcor > targetx [ lt 90 stop ]
   ]
   if heading = 90 [
-    if xcor < targetx [ move_fd ]
+    if xcor < targetx [ move_fd stop ]
     if xcor > targetx [ rt 180 stop ]
     if ycor > targety [ rt 90 stop ]
     if ycor < targety [ lt 90 stop ]
   ]
   if heading = 180 [
-    if ycor > targety [ move_fd ]
+    if ycor > targety [ move_fd stop ]
     if ycor < targety [ rt 180 stop ]
     if xcor > targetx [ rt 90 stop ]
     if xcor < targetx [ lt 90 stop ]
   ]
   if heading = 270 [
-    if xcor > targetx [ move_fd ]
+    if xcor > targetx [ move_fd stop ]
     if xcor < targetx [ rt 180 stop ]
     if ycor < targety [ rt 90 stop ]
     if ycor > targety [ lt 90 stop ]
@@ -141,10 +140,45 @@ to move_to_target
 end
 
 to move_fd
+  ; check for patch coordinates to store
+  if msgx != 1000 and msgy != 1000
+  [
+    set chargex msgx
+    set chargey msgy
+  ]
+  if any? ( neighbors4 with [ pcolor = green ] )
+  [
+    ask one-of ( neighbors4 with [ pcolor = green ] )
+    [
+      set msgx pxcor
+      set msgy pycor
+    ]
+  ]
+  if msgx != 1000 and msgy != 1000
+  [
+    set depx msgx
+    set depy msgy
+  ]
+  set msgx 1000
+  set msgy 1000
+  if any? ( neighbors4 with [ pcolor = blue ] )
+  [
+    ask one-of ( neighbors4 with [ pcolor = blue ] )
+    [
+      set msgx pxcor
+      set msgy pycor
+    ]
+  ]
+
   ; stop robots from crossing obstacles
   ifelse [pcolor] of patch-ahead 1 = white
   [turnRand]
-  [fd 1]
+  [
+    fd 1
+    set energia energia - 1
+  ]
+  set msgx 1000
+  set msgy 1000
 end
 
 to recolher
@@ -239,7 +273,7 @@ NIL
 T
 OBSERVER
 NIL
-NIL
+S
 NIL
 NIL
 1
