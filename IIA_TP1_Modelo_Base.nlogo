@@ -18,9 +18,9 @@ to setup
   [
     set shape "face happy"
     setxy random-pxcor random-pycor
-    set color red
+    set color cyan
     set heading 0
-    set energia energia_inicial
+    set energia energiaMax
     set cap capMax
     set objetivo "limpar"
     set recolhido 0
@@ -44,7 +44,7 @@ to go
   ask turtles
   [
     move
-    recolher
+    check_energia
     morrer
   ]
   mais-comida
@@ -100,7 +100,8 @@ to move_carregar
   ]
   if pcolor = blue
   [
-    set energia energia_inicial
+    set energia energiaMax
+    set color cyan
     set objetivo "limpar"
     set counter tempo_carregar
   ]
@@ -141,11 +142,9 @@ end
 
 to move_fd
   ; check for patch coordinates to store
-  if msgx != 1000 and msgy != 1000
-  [
-    set chargex msgx
-    set chargey msgy
-  ]
+
+  set msgx 1000
+  set msgy 1000
   if any? ( neighbors4 with [ pcolor = green ] )
   [
     ask one-of ( neighbors4 with [ pcolor = green ] )
@@ -169,6 +168,11 @@ to move_fd
       set msgy pycor
     ]
   ]
+  if msgx != 1000 and msgy != 1000
+  [
+    set chargex msgx
+    set chargey msgy
+  ]
 
   ; stop robots from crossing obstacles
   ifelse [pcolor] of patch-ahead 1 = white
@@ -177,8 +181,13 @@ to move_fd
     fd 1
     set energia energia - 1
   ]
-  set msgx 1000
-  set msgy 1000
+end
+
+to check_energia
+  if objetivo = "carregar" [stop]
+  if energia > energiaMin [stop]
+  set color red
+  set objetivo "carregar"
 end
 
 to recolher
@@ -391,10 +400,10 @@ SLIDER
 136
 151
 169
-energia_inicial
-energia_inicial
+energiaMax
+energiaMax
 0
-100
+200
 50.0
 1
 1
@@ -419,7 +428,7 @@ HORIZONTAL
 SLIDER
 20
 219
-193
+160
 252
 tempo_deposito
 tempo_deposito
@@ -434,7 +443,7 @@ HORIZONTAL
 SLIDER
 21
 262
-193
+160
 295
 tempo_carregar
 tempo_carregar
@@ -444,6 +453,21 @@ tempo_carregar
 1
 1
 ticks
+HORIZONTAL
+
+SLIDER
+24
+307
+161
+340
+energiaMin
+energiaMin
+0
+energia_inicial
+15.0
+1
+1
+NIL
 HORIZONTAL
 
 @#$#@#$#@
