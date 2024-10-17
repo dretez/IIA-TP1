@@ -5,15 +5,7 @@ turtles-own [energia cap recolhido objetivo counter chargex chargey depx depy ta
 to setup
   clear-all
   reset-ticks
-  ask patches
-  [
-    if random 101 < perc_comida
-    [
-      set pcolor yellow
-      set plabel one-of ["A" "B"]
-      set plabel-color black
-    ]
-  ]
+  setup-patches
   create-turtles n_agentes
   [
     set shape "face happy"
@@ -33,7 +25,6 @@ to setup
     set targety 0
   ]
   set nDeposito 0
-  set veneno one-of ["A" "B"]
 end
 
 to go
@@ -49,6 +40,16 @@ to go
   ]
   mais-comida
   tick
+end
+
+to setup-patches
+  ask patches with [pxcor < 2 and pycor < 2] [ set pcolor green ]
+  ask patches [
+    if (random 100 < Lixo) [ set pcolor red ]
+    ifelse (random 100 < Carregadores) [ set pcolor blue ]
+    [ if (random 100 < Obstaculos) [ set pcolor white ] ]
+  ]
+
 end
 
 to turnRand
@@ -255,10 +256,10 @@ to mais-comida
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-328
-17
-1105
-795
+413
+14
+1190
+792
 -1
 -1
 24.81
@@ -307,7 +308,7 @@ n_agentes
 n_agentes
 1
 30
-10.0
+30.0
 1
 1
 NIL
@@ -330,17 +331,6 @@ NIL
 NIL
 1
 
-MONITOR
-27
-367
-83
-412
-A
-count patches with [plabel = \"A\"]
-17
-1
-11
-
 SLIDER
 166
 98
@@ -355,28 +345,6 @@ perc_comida
 1
 NIL
 HORIZONTAL
-
-MONITOR
-181
-367
-239
-412
-NIL
-veneno
-17
-1
-11
-
-MONITOR
-102
-367
-159
-412
-B
-count patches with [plabel = \"B\"]
-17
-1
-11
 
 PLOT
 24
@@ -404,7 +372,7 @@ CHOOSER
 taxa_alteracao
 taxa_alteracao
 0 0.001 0.005 0.01 0.05 0.1
-0
+1
 
 SLIDER
 20
@@ -479,6 +447,51 @@ energiaMax
 1
 1
 NIL
+HORIZONTAL
+
+SLIDER
+220
+155
+392
+188
+Obstaculos
+Obstaculos
+0
+100
+20.0
+1
+1
+%
+HORIZONTAL
+
+SLIDER
+219
+207
+391
+240
+Lixo
+Lixo
+0
+60
+20.0
+1
+1
+%
+HORIZONTAL
+
+SLIDER
+220
+257
+392
+290
+Carregadores
+Carregadores
+0
+5
+5.0
+1
+1
+%
 HORIZONTAL
 
 @#$#@#$#@
