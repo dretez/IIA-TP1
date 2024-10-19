@@ -54,7 +54,7 @@ to setup-turtles
   [
     set shape "face happy"
     setxy random-pxcor random-pycor
-    while [pcolor != black] [setxy random-pxcor random-pycor]
+    while [pcolor != black or count turtles-here != 1] [setxy random-pxcor random-pycor]
     set color cyan
     set heading 0
     set energia energiaMax
@@ -68,6 +68,13 @@ to setup-turtles
     set depy 1000
     set targetx 0
     set targety 0
+  ]
+  create-inimigos n_inimigos
+  [
+    set shape "x"
+    setxy random-pxcor random-pycor
+    while [pcolor != black or count turtles-here != 1] [setxy random-pxcor random-pycor]
+    set color magenta
   ]
 end
 
@@ -268,10 +275,10 @@ to morrer
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-413
-14
-886
-488
+529
+12
+1002
+486
 -1
 -1
 15.0
@@ -329,10 +336,10 @@ NIL
 1
 
 SLIDER
-110
-20
-220
-53
+124
+38
+234
+71
 Lixo
 Lixo
 0
@@ -344,10 +351,10 @@ Lixo
 HORIZONTAL
 
 SLIDER
-110
-58
-220
-91
+124
+76
+234
+109
 Obstaculos
 Obstaculos
 0
@@ -359,10 +366,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-110
-96
-220
-129
+124
+114
+234
+147
 Carregadores
 Carregadores
 0
@@ -374,10 +381,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-238
-19
-370
-52
+250
+37
+359
+70
 n_aspiradores
 n_aspiradores
 1
@@ -388,29 +395,11 @@ n_aspiradores
 NIL
 HORIZONTAL
 
-PLOT
-21
-199
-221
-349
-plot 1
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot count turtles"
-
 SLIDER
-239
-59
-370
-92
+378
+36
+487
+69
 energiaMax
 energiaMax
 0
@@ -422,10 +411,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-237
-135
-368
-168
+376
+112
+487
+145
 capMax
 capMax
 0
@@ -437,10 +426,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-237
-177
-377
-210
+376
+154
+516
+187
 tempo_deposito
 tempo_deposito
 0
@@ -452,10 +441,10 @@ ticks
 HORIZONTAL
 
 SLIDER
-239
-220
 378
-253
+197
+517
+230
 tempo_carregar
 tempo_carregar
 0
@@ -467,10 +456,10 @@ ticks
 HORIZONTAL
 
 SLIDER
-238
-97
-375
-130
+377
+74
+486
+107
 energiaMin
 energiaMin
 0
@@ -482,10 +471,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-21
-142
-110
-187
+22
+168
+104
+213
 Lixo recolhido
 nDeposito
 0
@@ -493,15 +482,71 @@ nDeposito
 11
 
 MONITOR
-128
-142
-186
-187
+23
+220
+104
+265
 Lixo
 count patches with [pcolor = red]
 17
 1
 11
+
+SLIDER
+250
+77
+359
+110
+n_inimigos
+n_inimigos
+0
+5
+1.0
+1
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+128
+14
+168
+32
+Patches
+11
+0.0
+1
+
+MONITOR
+22
+115
+112
+160
+# aspiradores
+count aspiradores
+17
+1
+11
+
+TEXTBOX
+256
+15
+297
+33
+Turtles
+11
+0.0
+1
+
+TEXTBOX
+380
+16
+445
+34
+Aspiradores
+11
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
