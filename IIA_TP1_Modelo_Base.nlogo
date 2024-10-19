@@ -21,6 +21,7 @@ to go
   ask turtles
   [
     move
+    comunicar
     check_energia
     morrer
   ]
@@ -50,6 +51,7 @@ to setup-turtles
   [
     set shape "face happy"
     setxy random-pxcor random-pycor
+    while [pcolor != black] [setxy random-pxcor random-pycor]
     set color cyan
     set heading 0
     set energia energiaMax
@@ -234,17 +236,14 @@ to recolher
 end
 
 to comunicar
-  ask turtles
+  if chargex != 1000 and chargey != 1000
   [
-    if chargex != 1000 and chargey != 1000
+    set msgx chargex
+    set msgy chargey
+    ask turtles-on neighbors4
     [
-      set msgx chargex
-      set msgy chargey
-      ask turtles-on neighbors4
-      [
-        set chargex msgx
-        set chargey msgy
-      ]
+      set chargex msgx
+      set chargey msgy
     ]
   ]
 end
