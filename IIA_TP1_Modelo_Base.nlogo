@@ -25,7 +25,6 @@ to go
     morrer
   ]
   tick
- ;; mais-comida
 end
 
 to setup-patches
@@ -257,23 +256,6 @@ to morrer
     die
   ]
 end
-
-;;to mais-comida
- ;;  while [count patches with [pcolor = yellow] < ((max-pxcor * 2 + 1) * ( max-pycor * 2 + 1)) / (100 / perc_comida)]
-;; ask one-of patches with [pcolor = black]
-;;[
-;; set pcolor yellow
-;;ifelse count patches with [plabel = "A"] < count patches with [plabel = "B"]
-;; [
-;;         set plabel "A"
-;;       ]
-;;       [
-;;         set plabel "B"
-;;       ]
-;;       set plabel-color black
-;;     ]
-;;   ]
-;;end
 @#$#@#$#@
 GRAPHICS-WINDOW
 413
@@ -303,10 +285,10 @@ ticks
 30.0
 
 BUTTON
-23
-31
-89
-64
+20
+20
+90
+60
 NIL
 Setup
 NIL
@@ -319,26 +301,11 @@ NIL
 NIL
 1
 
-SLIDER
-20
-96
-152
-129
-n_agentes
-n_agentes
-1
-30
-10.0
-1
-1
-NIL
-HORIZONTAL
-
 BUTTON
-112
-31
-175
-64
+20
+65
+90
+105
 NIL
 Go
 T
@@ -352,25 +319,70 @@ NIL
 1
 
 SLIDER
-166
-98
-295
-131
-perc_comida
-perc_comida
-5
+110
 20
-20.0
+220
+53
+Lixo
+Lixo
+0
+60
+17.0
+1
+1
+%
+HORIZONTAL
+
+SLIDER
+110
+58
+220
+91
+Obstaculos
+Obstaculos
+0
+100
+100.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+110
+96
+220
+129
+Carregadores
+Carregadores
+0
+5
+5.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+238
+19
+370
+52
+n_agentes
+n_agentes
+1
+30
+10.0
 1
 1
 NIL
 HORIZONTAL
 
 PLOT
-24
-450
-224
-600
+21
+199
+221
+349
 plot 1
 NIL
 NIL
@@ -384,21 +396,11 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" "plot count turtles"
 
-CHOOSER
-185
-30
-323
-75
-taxa_alteracao
-taxa_alteracao
-0 0.001 0.005 0.01 0.05 0.1
-1
-
 SLIDER
-20
-136
-151
-169
+239
+59
+370
+92
 energiaMax
 energiaMax
 0
@@ -410,10 +412,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-20
-176
-151
-209
+237
+135
+368
+168
 capMax
 capMax
 0
@@ -425,10 +427,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-20
-219
-160
-252
+237
+177
+377
+210
 tempo_deposito
 tempo_deposito
 0
@@ -440,10 +442,10 @@ ticks
 HORIZONTAL
 
 SLIDER
-21
-262
-160
-295
+239
+220
+378
+253
 tempo_carregar
 tempo_carregar
 0
@@ -455,10 +457,10 @@ ticks
 HORIZONTAL
 
 SLIDER
-24
-307
-161
-340
+238
+97
+375
+130
 energiaMin
 energiaMin
 0
@@ -469,50 +471,27 @@ energiaMax
 NIL
 HORIZONTAL
 
-SLIDER
-220
-155
-392
-188
-Obstaculos
-Obstaculos
+MONITOR
+21
+142
+110
+187
+Lixo recolhido
+nDeposito
 0
-100
-100.0
 1
-1
-NIL
-HORIZONTAL
+11
 
-SLIDER
-219
-207
-391
-240
+MONITOR
+128
+142
+186
+187
 Lixo
-Lixo
-0
-60
-17.0
+count patches with [pcolor = red]
+17
 1
-1
-%
-HORIZONTAL
-
-SLIDER
-220
-257
-392
-290
-Carregadores
-Carregadores
-0
-5
-5.0
-1
-1
-NIL
-HORIZONTAL
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
