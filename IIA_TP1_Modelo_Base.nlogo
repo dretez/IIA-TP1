@@ -1,4 +1,4 @@
-globals [veneno msgx msgy nDeposito]
+globals [veneno msgx msgy nDeposito ]
 
 turtles-own [energia cap recolhido objetivo counter chargex chargey depx depy targetx targety rand]
 
@@ -38,16 +38,27 @@ to go
     check_energia
     morrer
   ]
-  mais-comida
-  tick
+ ;; mais-comida
+  reset-ticks
 end
 
 to setup-patches
-  ask patches with [pxcor < 2 and pycor < 2] [ set pcolor green ]
-  ask patches [
-    if (random 100 < Lixo) [ set pcolor red ]
-    ifelse (random 100 < Carregadores) [ set pcolor blue ]
-    [ if (random 100 < Obstaculos) [ set pcolor white ] ]
+   clear-all
+  set-patch-size 15
+ ask patches[
+    if pcolor = black and random 100 < Lixo [set pcolor red]
+  ]
+
+  ask n-of Carregadores patches with [pcolor = black] [set pcolor blue]
+  ask n-of Obstaculos patches with [pcolor = black] [set pcolor white]
+
+  let canto one-of patches with [pxcor < max-pxcor - 1 and pycor < max-pycor - 1 and pxcor > min-pxcor + 1 and pycor > min-pycor + 1 and pcolor = black]
+
+  ask canto [
+    set pcolor green
+    ask patch-at 1 0 [set pcolor green]
+    ask patch-at 0 1 [set pcolor green]
+    ask patch-at 1 1 [set pcolor green]
   ]
 
 end
@@ -237,32 +248,31 @@ to morrer
   ]
 end
 
-to mais-comida
-   while [count patches with [pcolor = yellow] < ((max-pxcor * 2 + 1) * ( max-pycor * 2 + 1)) / (100 / perc_comida)]
-   [
-     ask one-of patches with [pcolor = black]
-     [
-       set pcolor yellow
-       ifelse count patches with [plabel = "A"] < count patches with [plabel = "B"]
-       [
-         set plabel "A"
-       ]
-       [
-         set plabel "B"
-       ]
-       set plabel-color black
-     ]
-   ]
-end
+;;to mais-comida
+ ;;  while [count patches with [pcolor = yellow] < ((max-pxcor * 2 + 1) * ( max-pycor * 2 + 1)) / (100 / perc_comida)]
+;; ask one-of patches with [pcolor = black]
+;;[
+;; set pcolor yellow
+;;ifelse count patches with [plabel = "A"] < count patches with [plabel = "B"]
+;; [
+;;         set plabel "A"
+;;       ]
+;;       [
+;;         set plabel "B"
+;;       ]
+;;       set plabel-color black
+;;     ]
+;;   ]
+;;end
 @#$#@#$#@
 GRAPHICS-WINDOW
 413
 14
-1190
-792
+886
+488
 -1
 -1
-24.81
+15.0
 1
 10
 1
@@ -340,7 +350,7 @@ perc_comida
 perc_comida
 5
 20
-5.0
+20.0
 1
 1
 NIL
@@ -458,7 +468,7 @@ Obstaculos
 Obstaculos
 0
 100
-20.0
+100.0
 1
 1
 %
@@ -473,7 +483,7 @@ Lixo
 Lixo
 0
 60
-20.0
+17.0
 1
 1
 %
@@ -488,7 +498,7 @@ Carregadores
 Carregadores
 0
 5
-5.0
+0.0
 1
 1
 %
