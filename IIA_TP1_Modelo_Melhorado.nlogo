@@ -1,6 +1,9 @@
+breed [aspiradores aspirador]
+breed [inimigos inimigo]
+
 globals [veneno msgx msgy nDeposito ]
 
-turtles-own [
+aspiradores-own [
   energia cap recolhido objetivo counter rand
   chargex chargey depx depy targetx targety head dist
 ]
@@ -18,9 +21,9 @@ to go
   [
     stop
   ]
-  ask turtles
+  ask aspiradores
   [
-    move
+    move_aspirador
     comunicar
     check_energia
     morrer
@@ -47,7 +50,7 @@ to setup-patches
 end
 
 to setup-turtles
-  create-turtles n_agentes
+  create-aspiradores n_aspiradores
   [
     set shape "face happy"
     setxy random-pxcor random-pycor
@@ -74,7 +77,7 @@ to turnRand
   [right 90]
 end
 
-to move
+to move_aspirador
   if counter > 0
   [
     set counter counter - 1
@@ -206,10 +209,7 @@ to move_fd
 
   ; stop robots from crossing obstacles
   ifelse (not can-move? 1) or [pcolor] of patch-ahead 1 = white
-  [
-    turnRand
-    ;move_fd
-  ]
+  [ turnRand ]
   [
     fd 1
     set energia energia - 1
@@ -236,12 +236,12 @@ to recolher
 end
 
 to comunicar
-  if not any? turtles-on neighbors4 [stop]
+  if not any? aspiradores-on neighbors4 [stop]
   if chargex != 1000 and chargey != 1000
   [
     set msgx chargex
     set msgy chargey
-    ask turtles-on neighbors4
+    ask aspiradores-on neighbors4
     [
       set chargex msgx
       set chargey msgy
@@ -251,7 +251,7 @@ to comunicar
   [
     set msgx depx
     set msgy depy
-    ask turtles-on neighbors4
+    ask aspiradores-on neighbors4
     [
       set depx msgx
       set depy msgy
@@ -378,8 +378,8 @@ SLIDER
 19
 370
 52
-n_agentes
-n_agentes
+n_aspiradores
+n_aspiradores
 1
 30
 10.0
