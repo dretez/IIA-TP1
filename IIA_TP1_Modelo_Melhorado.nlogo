@@ -3,6 +3,7 @@ breed [inimigos inimigo]
 
 globals [veneno msgx msgy nDeposito ]
 
+inimigos-own [rand]
 aspiradores-own [
   energia cap recolhido objetivo counter rand
   chargex chargey depx depy targetx targety head dist
@@ -23,10 +24,18 @@ to go
   ]
   ask aspiradores
   [
+    check_neighbors_pcolor
     move_aspirador
     comunicar
     check_energia
     morrer
+  ]
+  ask inimigos
+  [
+    set rand random 2
+    move_inimigo
+    while [rand = 1] [set rand random 2 move_inimigo]
+    drop_lixo
   ]
   tick
 end
@@ -56,7 +65,7 @@ to setup-turtles
     setxy random-pxcor random-pycor
     while [pcolor != black or count turtles-here != 1] [setxy random-pxcor random-pycor]
     set color cyan
-    set heading 0
+    set heading (random 3) * 90
     set energia energiaMax
     set cap capMax
     set objetivo "limpar"
@@ -74,7 +83,8 @@ to setup-turtles
     set shape "x"
     setxy random-pxcor random-pycor
     while [pcolor != black or count turtles-here != 1] [setxy random-pxcor random-pycor]
-    set color magenta
+    set color yellow
+    set heading (random 3) * 90
   ]
 end
 
@@ -82,6 +92,13 @@ to turnRand
   ifelse random 1 = 1
   [left 90]
   [right 90]
+end
+
+to move_inimigo
+  if random 100 < 10 [ turnRand stop ]
+  ifelse (not can-move? 1) or [pcolor] of patch-ahead 1 = white
+  [ turnRand ]
+  [ fd 1 ]
 end
 
 to move_aspirador
@@ -165,7 +182,7 @@ to calc_move_dist
   let next-patch patch-at-heading-and-distance head 1
 
 
-  if next-patch = nobody or [pcolor] of next-patch = white [stop]
+  if next-patch = nobody or [pcolor] of next-patch = white or any? inimigos-on next-patch [stop]
   let nextx [pxcor] of next-patch
   let nexty [pycor] of next-patch
   if dist = -1
@@ -182,6 +199,35 @@ to calc_move_dist
 end
 
 to move_fd
+  ; stop robots from crossing obstacles
+  ifelse (not can-move? 1) or [pcolor] of patch-ahead 1 = white or any? inimigos-on patch-ahead 1
+  [ turnRand ]
+  [
+    fd 1
+    set energia energia - 1
+  ]
+end
+
+to check_energia
+  if objetivo = "carregar" [stop]
+  if energia > energiaMin [stop]
+  set color red
+  set objetivo "carregar"
+end
+
+to recolher
+  if pcolor = red and recolhido < cap
+  [
+    ask one-of (patch-set patch-here neighbors4 with [pcolor = red])
+    [
+      set pcolor black
+    ]
+    set recolhido recolhido + 1
+  ]
+  if recolhido = cap [ set objetivo "despejar" ]
+end
+
+to check_neighbors_pcolor
   ; check for patch coordinates to store
   set msgx 1000
   set msgy 1000
@@ -214,32 +260,6 @@ to move_fd
     set chargey msgy
   ]
 
-  ; stop robots from crossing obstacles
-  ifelse (not can-move? 1) or [pcolor] of patch-ahead 1 = white
-  [ turnRand ]
-  [
-    fd 1
-    set energia energia - 1
-  ]
-end
-
-to check_energia
-  if objetivo = "carregar" [stop]
-  if energia > energiaMin [stop]
-  set color red
-  set objetivo "carregar"
-end
-
-to recolher
-  if pcolor = red and recolhido < cap
-  [
-    ask one-of (patch-set patch-here neighbors4 with [pcolor = red])
-    [
-      set pcolor black
-    ]
-    set recolhido recolhido + 1
-  ]
-  if recolhido = cap [ set objetivo "despejar" ]
 end
 
 to comunicar
@@ -264,6 +284,10 @@ to comunicar
       set depy msgy
     ]
   ]
+end
+
+to drop_lixo
+  if pcolor = black and random 100 < 5 [set pcolor red]
 end
 
 to morrer
@@ -500,8 +524,8 @@ SLIDER
 n_inimigos
 n_inimigos
 0
-5
-1.0
+20
+5.0
 1
 1
 NIL
