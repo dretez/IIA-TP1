@@ -1,11 +1,52 @@
 globals [veneno msgx msgy nDeposito ]
 
-turtles-own [energia cap recolhido objetivo counter chargex chargey depx depy targetx targety rand]
+turtles-own [
+  energia cap recolhido objetivo counter rand
+  chargex chargey depx depy targetx targety head dist
+]
 
 to setup
   clear-all
   reset-ticks
   setup-patches
+  setup-turtles
+  set nDeposito 0
+end
+
+to go
+  if count turtles = 0
+  [
+    stop
+  ]
+  ask turtles
+  [
+    move
+    check_energia
+    morrer
+  ]
+  tick
+ ;; mais-comida
+end
+
+to setup-patches
+  set-patch-size 15
+  let canto one-of patches with [pxcor < max-pxcor and pycor < max-pycor and pcolor = black]
+  ask canto [
+    set pcolor green
+    ask patch-at 1 0 [set pcolor green]
+    ask patch-at 0 1 [set pcolor green]
+    ask patch-at 1 1 [set pcolor green]
+  ]
+
+  ask patches[
+    if pcolor = black and random 100 < Lixo [set pcolor red]
+  ]
+
+  ask n-of Carregadores patches with [pcolor = black] [set pcolor blue]
+  ask n-of Obstaculos patches with [pcolor = black] [set pcolor white]
+end
+
+to setup-turtles
   create-turtles n_agentes
   [
     set shape "face happy"
@@ -24,43 +65,6 @@ to setup
     set targetx 0
     set targety 0
   ]
-  set nDeposito 0
-end
-
-to go
-  if count turtles = 0
-  [
-    stop
-  ]
-  ask turtles
-  [
-    move
-    check_energia
-    morrer
-  ]
- ;; mais-comida
-  reset-ticks
-end
-
-to setup-patches
-   clear-all
-  set-patch-size 15
- ask patches[
-    if pcolor = black and random 100 < Lixo [set pcolor red]
-  ]
-
-  ask n-of Carregadores patches with [pcolor = black] [set pcolor blue]
-  ask n-of Obstaculos patches with [pcolor = black] [set pcolor white]
-
-  let canto one-of patches with [pxcor < max-pxcor - 1 and pycor < max-pycor - 1 and pxcor > min-pxcor + 1 and pycor > min-pycor + 1 and pcolor = black]
-
-  ask canto [
-    set pcolor green
-    ask patch-at 1 0 [set pcolor green]
-    ask patch-at 0 1 [set pcolor green]
-    ask patch-at 1 1 [set pcolor green]
-  ]
-
 end
 
 to turnRand
@@ -137,29 +141,32 @@ to move_random
 end
 
 to move_to_target
-  if heading = 0 [
-    if ycor < targety [ move_fd stop ]
-    if ycor > targety [ rt 180 stop ]
-    if xcor < targetx [ rt 90 stop ]
-    if xcor > targetx [ lt 90 stop ]
+  set dist -1
+  set head heading - 180
+  calc_move_dist
+  calc_move_dist
+  calc_move_dist
+  move_fd
+end
+
+to calc_move_dist
+  set head head + 90
+  let next-patch patch-at-heading-and-distance head 1
+
+
+  if next-patch = nobody or [pcolor] of next-patch = white [stop]
+  let nextx [pxcor] of next-patch
+  let nexty [pycor] of next-patch
+  if dist = -1
+  [
+    set dist (abs (targetx - nextx)) ^ 2 + (abs (targety - nexty)) ^ 2
+    set heading head
+    stop
   ]
-  if heading = 90 [
-    if xcor < targetx [ move_fd stop ]
-    if xcor > targetx [ rt 180 stop ]
-    if ycor > targety [ rt 90 stop ]
-    if ycor < targety [ lt 90 stop ]
-  ]
-  if heading = 180 [
-    if ycor > targety [ move_fd stop ]
-    if ycor < targety [ rt 180 stop ]
-    if xcor > targetx [ rt 90 stop ]
-    if xcor < targetx [ lt 90 stop ]
-  ]
-  if heading = 270 [
-    if xcor > targetx [ move_fd stop ]
-    if xcor < targetx [ rt 180 stop ]
-    if ycor < targety [ rt 90 stop ]
-    if ycor > targety [ lt 90 stop ]
+  if ((abs (targetx - nextx)) ^ 2 + (abs (targety - nexty)) ^ 2) < dist
+  [
+    set dist (abs (targetx - nextx)) ^ 2 + (abs (targety - nexty)) ^ 2
+    set heading head
   ]
 end
 
@@ -167,7 +174,7 @@ to move_fd
   ; check for patch coordinates to store
   set msgx 1000
   set msgy 1000
-  if any? ( neighbors4 with [ pcolor = green ] )
+  if depx = 1000 and depy = 1000 and any? ( neighbors4 with [ pcolor = green ] )
   [
     ask one-of ( neighbors4 with [ pcolor = green ] )
     [
@@ -197,8 +204,11 @@ to move_fd
   ]
 
   ; stop robots from crossing obstacles
-  ifelse [pcolor] of patch-ahead 1 = white
-  [turnRand]
+  ifelse (not can-move? 1) or [pcolor] of patch-ahead 1 = white
+  [
+    turnRand
+    ;move_fd
+  ]
   [
     fd 1
     set energia energia - 1
@@ -279,8 +289,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-1
-1
+0
+0
 1
 -15
 15
@@ -318,7 +328,7 @@ n_agentes
 n_agentes
 1
 30
-30.0
+10.0
 1
 1
 NIL
@@ -393,7 +403,7 @@ energiaMax
 energiaMax
 0
 200
-50.0
+100.0
 1
 1
 NIL
@@ -453,7 +463,7 @@ energiaMin
 energiaMin
 0
 energiaMax
-15.0
+25.0
 1
 1
 NIL
@@ -471,7 +481,7 @@ Obstaculos
 100.0
 1
 1
-%
+NIL
 HORIZONTAL
 
 SLIDER
@@ -498,10 +508,10 @@ Carregadores
 Carregadores
 0
 5
-0.0
+5.0
 1
 1
-%
+NIL
 HORIZONTAL
 
 @#$#@#$#@
