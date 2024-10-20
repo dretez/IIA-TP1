@@ -259,7 +259,14 @@ end
 
 to check_energia
   if objetivo = "carregar" [stop]
-  if energia > energiaMin [stop]
+  ifelse any? chargers and carregamento-inteligente?
+  [
+    set msg-agentset self
+    let target min-one-of chargers [distance msg-agentset]
+    if ceiling(sqrt((distance target ^ 2) / 2) * 2) <= energia [stop]
+  ]
+  [if energia > energiaMin [stop]]
+
   set color red
   set objetivo "carregar"
 end
@@ -591,6 +598,17 @@ SWITCH
 315
 limpeza-inteligente?
 limpeza-inteligente?
+1
+1
+-1000
+
+SWITCH
+28
+330
+229
+363
+carregamento-inteligente?
+carregamento-inteligente?
 0
 1
 -1000
