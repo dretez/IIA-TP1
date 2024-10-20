@@ -1,12 +1,13 @@
 breed [aspiradores aspirador]
 breed [inimigos inimigo]
 
-globals [veneno msgx msgy nDeposito ]
+globals [veneno msgx msgy nDeposito msg-agentset]
 
 inimigos-own [rand]
 aspiradores-own [
   energia cap recolhido objetivo counter rand
   chargex chargey depx depy targetx targety head dist
+  memory chargers deposits patches-lixo walls
 ]
 
 to setup
@@ -18,15 +19,15 @@ to setup
 end
 
 to go
-  if count turtles = 0
+  if count aspiradores = 0 or count patches with [pcolor = red] = 0 or ticks >= 10000
   [
     stop
   ]
   ask aspiradores
   [
-    check_neighbors_pcolor
-    move_aspirador
+    save_path_to_memory
     comunicar
+    move_aspirador
     check_energia
     morrer
   ]
@@ -68,15 +69,21 @@ to setup-turtles
     set heading (random 3) * 90
     set energia energiaMax
     set cap capMax
-    set objetivo "limpar"
     set recolhido 0
     set counter 0
     set chargex 1000
     set chargey 1000
     set depx 1000
     set depy 1000
-    set targetx 0
-    set targety 0
+    set objetivo "limpar"
+    set targetx random-pxcor
+    set targety random-pycor
+    ; memory
+    set memory (patch-set)
+    set patches-lixo (patch-set)
+    set chargers (patch-set)
+    set deposits (patch-set)
+    set walls (patch-set)
   ]
   create-inimigos n_inimigos
   [
@@ -88,17 +95,21 @@ to setup-turtles
   ]
 end
 
-to turnRand
-  ifelse random 1 = 1
-  [left 90]
-  [right 90]
-end
-
 to move_inimigo
   if random 100 < 10 [ turnRand stop ]
   ifelse (not can-move? 1) or [pcolor] of patch-ahead 1 = white
   [ turnRand ]
   [ fd 1 ]
+end
+
+to drop_lixo
+  if pcolor = black and random 100 < 5 [set pcolor red]
+end
+
+to turnRand
+  ifelse random 1 = 1
+  [left 90]
+  [right 90]
 end
 
 to move_aspirador
@@ -107,7 +118,7 @@ to move_aspirador
     set counter counter - 1
     stop
   ]
-  if objetivo = "limpar" [ move_limpar stop ]
+  if objetivo = "limpar" [ ifelse limpeza-inteligente? [move_limpar_smart] [move_limpar] stop ]
   if objetivo = "despejar" [ move_despejar stop ]
   if objetivo = "carregar" [ move_carregar stop ]
 end
@@ -124,18 +135,33 @@ to move_limpar
     set ycor msgy
     set energia energia - 1
   ]
-  [ move_random ]
+  [move_random]
+  recolher
+end
+
+to move_limpar_smart
+  ifelse any? patches-lixo
+  [
+    set msg-agentset self
+    let target min-one-of patches-lixo [distance msg-agentset]
+    set targetx [pxcor] of target
+    set targety [pycor] of target
+    move_to_target
+  ]
+  [move_random]
   recolher
 end
 
 to move_despejar
-  ifelse depx = 1000 and depy = 1000
-  [ move_random ]
+  ifelse any? deposits
   [
-    set targetx depx
-    set targety depy
+    set msg-agentset self
+    let target min-one-of deposits [distance msg-agentset]
+    set targetx [pxcor] of target
+    set targety [pycor] of target
     move_to_target
   ]
+  [ move_random ]
   if pcolor = green
   [
     set nDeposito nDeposito + recolhido
@@ -146,13 +172,15 @@ to move_despejar
 end
 
 to move_carregar
-  ifelse chargex = 1000 and chargey = 1000
-  [ move_random ]
+  ifelse any? chargers
   [
-    set targetx chargex
-    set targety chargey
+    set msg-agentset self
+    let target min-one-of chargers [distance msg-agentset]
+    set targetx [pxcor] of target
+    set targety [pycor] of target
     move_to_target
   ]
+  [ move_random ]
   if pcolor = blue
   [
     set energia energiaMax
@@ -160,12 +188,6 @@ to move_carregar
     set objetivo "limpar"
     set counter tempo_carregar
   ]
-end
-
-to move_random
-  ifelse random 100 < 10
-  [ turnRand ]
-  [ move_fd ]
 end
 
 to move_to_target
@@ -181,7 +203,6 @@ to calc_move_dist
   set head head + 90
   let next-patch patch-at-heading-and-distance head 1
 
-
   if next-patch = nobody or [pcolor] of next-patch = white or any? inimigos-on next-patch [stop]
   let nextx [pxcor] of next-patch
   let nexty [pycor] of next-patch
@@ -196,6 +217,34 @@ to calc_move_dist
     set dist (abs (targetx - nextx)) ^ 2 + (abs (targety - nexty)) ^ 2
     set heading head
   ]
+end
+
+to move_random
+  if limpeza-inteligente?
+  [
+    move_to_target
+    if patch-here = patch targetx targety or member? patch targetx targety walls
+    [pick_random_target]
+    stop
+  ]
+  ifelse random 100 < 10
+  [ turnRand ]
+  [ move_fd ]
+end
+
+to pick_random_target
+  set msg-agentset memory
+  if any? patches with [not member? self msg-agentset]
+  [
+    set msg-agentset one-of patches with [not member? self msg-agentset]
+    set targetx [pxcor] of msg-agentset
+    set targety [pycor] of msg-agentset
+    stop
+  ]
+  set msg-agentset walls
+  set msg-agentset one-of memory with [not member? self msg-agentset]
+  set targetx [pxcor] of msg-agentset
+  set targety [pycor] of msg-agentset
 end
 
 to move_fd
@@ -227,67 +276,30 @@ to recolher
   if recolhido = cap [ set objetivo "despejar" ]
 end
 
-to check_neighbors_pcolor
-  ; check for patch coordinates to store
-  set msgx 1000
-  set msgy 1000
-  if depx = 1000 and depy = 1000 and any? ( neighbors4 with [ pcolor = green ] )
-  [
-    ask one-of ( neighbors4 with [ pcolor = green ] )
-    [
-      set msgx pxcor
-      set msgy pycor
-    ]
-  ]
-  if msgx != 1000 and msgy != 1000
-  [
-    set depx msgx
-    set depy msgy
-  ]
-  set msgx 1000
-  set msgy 1000
-  if any? ( neighbors4 with [ pcolor = blue ] )
-  [
-    ask one-of ( neighbors4 with [ pcolor = blue ] )
-    [
-      set msgx pxcor
-      set msgy pycor
-    ]
-  ]
-  if msgx != 1000 and msgy != 1000
-  [
-    set chargex msgx
-    set chargey msgy
-  ]
+to save_path_to_memory
+  set msg-agentset neighbors4
+  set memory (patch-set memory neighbors4) ; an agentset with all the patches the vacuum has passed by
 
+  let walls_here msg-agentset with [pcolor = white or any? inimigos-here]
+
+  set walls (patch-set walls walls_here)
+  with [not member? self msg-agentset with [pcolor != white or any? inimigos-here]] ; remove walls that weren't walls after all
+
+  set chargers (patch-set chargers msg-agentset with [pcolor = blue])
+  with [not member? self walls_here] ; exclude patches that have an enemy
+
+  set deposits (patch-set deposits msg-agentset with [pcolor = green])
+  with [not member? self walls_here] ; exclude patches that have an enemy
+
+  set patches-lixo (patch-set patches-lixo msg-agentset with [pcolor = red])
+  with [not member? self msg-agentset with [pcolor != red]  ; remove patches that are no longer red
+  and not member? self walls_here] ; exclude patches that have an enemy
 end
 
 to comunicar
   if not any? aspiradores-on neighbors4 [stop]
-  if chargex != 1000 and chargey != 1000
-  [
-    set msgx chargex
-    set msgy chargey
-    ask aspiradores-on neighbors4
-    [
-      set chargex msgx
-      set chargey msgy
-    ]
-  ]
-  if depx != 1000 and depy != 1000
-  [
-    set msgx depx
-    set msgy depy
-    ask aspiradores-on neighbors4
-    [
-      set depx msgx
-      set depy msgy
-    ]
-  ]
-end
-
-to drop_lixo
-  if pcolor = black and random 100 < 5 [set pcolor red]
+  set chargers (patch-set chargers [chargers] of aspiradores-on neighbors4)
+  set deposits (patch-set deposits [deposits] of aspiradores-on neighbors4)
 end
 
 to morrer
@@ -571,6 +583,17 @@ Aspiradores
 11
 0.0
 1
+
+SWITCH
+28
+282
+192
+315
+limpeza-inteligente?
+limpeza-inteligente?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
