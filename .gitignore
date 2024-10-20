@@ -1,2 +1,6 @@
 # netlogo temp files
 *.tmp.nlogo
+
+# office ignore files
+~$*.xlsx
+~$*.docx
