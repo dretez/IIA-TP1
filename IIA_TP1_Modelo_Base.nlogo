@@ -14,7 +14,7 @@ to setup
 end
 
 to go
-  if count turtles = 0
+  if count turtles = 0 or ticks = 10000 or count patches with [pcolor = red] = 0
   [
     stop
   ]
@@ -326,7 +326,7 @@ Lixo
 Lixo
 0
 60
-17.0
+40.0
 1
 1
 %
@@ -376,24 +376,6 @@ n_agentes
 1
 NIL
 HORIZONTAL
-
-PLOT
-21
-199
-221
-349
-plot 1
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot count turtles"
 
 SLIDER
 239
@@ -824,6 +806,85 @@ NetLogo 6.4.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="Percentagem Lixo" repetitions="10" runMetricsEveryStep="false">
+    <setup>Setup</setup>
+    <go>Go</go>
+    <metric>count turtles</metric>
+    <metric>(count patches with [pcolor = red]) / (count patches) * 100</metric>
+    <metric>ticks</metric>
+    <enumeratedValueSet variable="n_agentes">
+      <value value="10"/>
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Lixo">
+      <value value="20"/>
+      <value value="40"/>
+      <value value="60"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Capacidade" repetitions="10" runMetricsEveryStep="false">
+    <setup>Setup</setup>
+    <go>Go</go>
+    <metric>count turtles</metric>
+    <metric>(count patches with [pcolor = red]) / (count patches) * 100</metric>
+    <metric>ticks</metric>
+    <enumeratedValueSet variable="n_agentes">
+      <value value="10"/>
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="capMax">
+      <value value="5"/>
+      <value value="10"/>
+      <value value="20"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Energia Inicial" repetitions="10" runMetricsEveryStep="false">
+    <setup>Setup</setup>
+    <go>Go</go>
+    <metric>count turtles</metric>
+    <metric>(count patches with [pcolor = red]) / (count patches) * 100</metric>
+    <metric>ticks</metric>
+    <enumeratedValueSet variable="n_agentes">
+      <value value="10"/>
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="energiaMax">
+      <value value="50"/>
+      <value value="100"/>
+      <value value="150"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Energia Minima" repetitions="10" runMetricsEveryStep="false">
+    <setup>Setup</setup>
+    <go>Go</go>
+    <metric>count turtles</metric>
+    <metric>(count patches with [pcolor = red]) / (count patches) * 100</metric>
+    <metric>ticks</metric>
+    <enumeratedValueSet variable="n_agentes">
+      <value value="10"/>
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="energiaMin">
+      <value value="15"/>
+      <value value="25"/>
+      <value value="50"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Comparacao Modelo" repetitions="60" runMetricsEveryStep="false">
+    <setup>Setup</setup>
+    <go>Go</go>
+    <metric>count turtles</metric>
+    <metric>(count patches with [pcolor = red]) / (count patches) * 100</metric>
+    <metric>ticks</metric>
+    <enumeratedValueSet variable="n_agentes">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Lixo">
+      <value value="40"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default

@@ -387,7 +387,7 @@ Lixo
 Lixo
 0
 60
-17.0
+40.0
 1
 1
 %
@@ -432,7 +432,7 @@ n_aspiradores
 n_aspiradores
 1
 30
-10.0
+20.0
 1
 1
 NIL
@@ -544,7 +544,7 @@ n_inimigos
 n_inimigos
 0
 20
-5.0
+0.0
 1
 1
 NIL
@@ -598,7 +598,7 @@ SWITCH
 315
 limpeza-inteligente?
 limpeza-inteligente?
-1
+0
 1
 -1000
 
@@ -609,7 +609,7 @@ SWITCH
 363
 carregamento-inteligente?
 carregamento-inteligente?
-0
+1
 1
 -1000
 
@@ -945,6 +945,65 @@ NetLogo 6.4.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="Inimigos" repetitions="10" runMetricsEveryStep="false">
+    <setup>Setup</setup>
+    <go>Go</go>
+    <metric>count turtles</metric>
+    <metric>(count patches with [pcolor = red]) / (count patches) * 100</metric>
+    <metric>ticks</metric>
+    <enumeratedValueSet variable="n_aspiradores">
+      <value value="10"/>
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n_inimigos">
+      <value value="0"/>
+      <value value="5"/>
+      <value value="10"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Comparacao Modelos" repetitions="60" runMetricsEveryStep="false">
+    <setup>Setup</setup>
+    <go>Go</go>
+    <metric>count turtles</metric>
+    <metric>(count patches with [pcolor = red]) / (count patches) * 100</metric>
+    <metric>ticks</metric>
+    <enumeratedValueSet variable="n_aspiradores">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Lixo">
+      <value value="40"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Limpeza Inteligente" repetitions="30" runMetricsEveryStep="false">
+    <setup>Setup</setup>
+    <go>Go</go>
+    <metric>count turtles</metric>
+    <metric>(count patches with [pcolor = red]) / (count patches) * 100</metric>
+    <metric>ticks</metric>
+    <enumeratedValueSet variable="limpeza-inteligente?">
+      <value value="false"/>
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Lixo">
+      <value value="40"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Carregamento Inteligente" repetitions="30" runMetricsEveryStep="false">
+    <setup>Setup</setup>
+    <go>Go</go>
+    <metric>count turtles</metric>
+    <metric>(count patches with [pcolor = red]) / (count patches) * 100</metric>
+    <metric>ticks</metric>
+    <enumeratedValueSet variable="carregamento-inteligente?">
+      <value value="false"/>
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Lixo">
+      <value value="40"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
